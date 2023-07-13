@@ -16,7 +16,7 @@ library(
 pipeline {
   agent {
     kubernetes {
-      yaml podDef([retrofit: 'jenkins/k8s-pods-local.yaml'])
+      yamlFile 'jenkins/k8s-pods-local.yaml'
     }
   }
 
