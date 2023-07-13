@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: personalization-api
+  labels:
+    purpose: cicd-jenkins-agent
+    spotinst.io/restrict-scale-down: "true"
+  annotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+spec:
+  serviceAccountName: jenkins-service-account
+  imagePullSecrets:
+    - name: jfrog-dockerconfigjson
+  containers:
+    - name: jnlp
+      image: registry.container.tlium.com/jenkins/inbound-agent:4.11.2-4
+      # jnlp image entrypoint does what we want so we do not specify a command
+      resources:
+        requests:
+          cpu: "1000m"
+          memory: "512Mi"
+        limits:
+          cpu: "1500m"
+          memory: "1024Mi"
+      env:
+        - name: ACCOUNT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: environment-metadata
+              key: accountID
+        - name: ACCOUNT_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: environment-metadata
+              key: accountName
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: environment-metadata
+              key: environmentName
+        - name: ENVIRONMENT_PREFIX
+          valueFrom:
+            configMapKeyRef:
+              name: environment-metadata
+              key: environmentPrefix
+        - name: ENVIRONMENT_TYPE
+          valueFrom:
+            configMapKeyRef:
+              name: environment-metadata
+              key: environmentType
+        - name: PLATFORM_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: environment-metadata
+              key: platformName
+        - name: REGION
+          valueFrom:
+            configMapKeyRef:
+              name: environment-metadata
+              key: region
+        - name: SHORT_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: environment-metadata
+              key: shortRegion
+      volumeMounts:
+        - mountPath: /etc/tealium
+          name: tmp
+          readOnly: false
+    - name: terraform
+      image: registry.container.tlium.com/terraform-container:awscli-2.11.7-terraform-1.4.2
+      command: [tail, -f, /dev/null]
+      tty: true
+      resources:
+        requests:
+          cpu: 500m
+          memory: 256Mi
+        limits:
+          cpu: 1000m
+          memory: 512Mi
+      volumeMounts:
+        - mountPath: /etc/tealium
+          name: tmp
+          readOnly: false
+    - name: webhooks
+      image: registry.container.tlium.com/jenkins-webhooks-container:latest
+      command: [tail, -f, /dev/null]
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: 1000m
+          memory: 2Gi
+  volumes:
+    - name: tmp
+      emptyDir: {}
