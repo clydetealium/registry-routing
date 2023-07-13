@@ -46,8 +46,8 @@ pipeline {
           script {
             gitCheckout()
             sourceVersion()
-            webhooksHelper.inProgress()
-            sourceVersion.checkUpToDate()
+            // webhooksHelper.inProgress()
+            // sourceVersion.checkUpToDate()
           }
         }
       }
@@ -71,39 +71,46 @@ pipeline {
           steps {
             container(terraform) {
               dir(terraform) {
-                script { tealTerraform.plan() }
+                script {
+                    sh '''
+                      terraform init
+                      terraform plan -input=false -out=./tf.plan
+                      terraform apply -input=false -auto-approve ./tf.plan
+                    '''
+                    // tealTerraform.plan()
+                }
               }
             }
           }
         }
 
-        stage('Apply') {
-          steps {
-            container(terraform) {
-              dir(terraform) {
-                script { tealTerraform.apply() }
-              }
-            }
-          }
-        }
+        // stage('Apply') {
+        //   steps {
+        //     container(terraform) {
+        //       dir(terraform) {
+        //         script { tealTerraform.apply() }
+        //       }
+        //     }
+        //   }
+        // }
       }
     }
 
-    stage('Create Pre-Release') {
-      when { expression { sourceVersion.runningOnDefaultBranch() } }
-      steps { container(webhooks) { script { cutRelease() } } }
-    }
+    // stage('Create Pre-Release') {
+    //   when { expression { sourceVersion.runningOnDefaultBranch() } }
+    //   steps { container(webhooks) { script { cutRelease() } } }
+    // }
   }
 
-  post {
-    always {
-      container(webhooks) {
-        script {
-          deploymentOrchestrator(env.ENVIRONMENT)
-          sourceVersion.checkUpToDate()
-          webhooksHelper.post()
-        }
-      }
-    }
-  }
+//   post {
+//     always {
+//       container(webhooks) {
+//         script {
+//         //   deploymentOrchestrator(env.ENVIRONMENT)
+//         //   sourceVersion.checkUpToDate()
+//         //   webhooksHelper.post()
+//         }
+//       }
+//     }
+//   }
 }
