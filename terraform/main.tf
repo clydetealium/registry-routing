@@ -11,7 +11,7 @@ resource "aws_route53_record" "region_record" {
   for_each = { for region in var.regions : region => region }
   zone_id = aws_route53_zone.container_registry.zone_id
   name    = "registry.tlium.com"
-  type    = "CNAME"
+  type    = "A"
   ttl     = "300"
 
   set_identifier = "${each.key}-${var.account_alias}-local-registry"
