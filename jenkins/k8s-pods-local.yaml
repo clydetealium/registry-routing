@@ -13,7 +13,7 @@ spec:
     - name: jfrog-dockerconfigjson
   containers:
     - name: jnlp
-      image: reg.container.tlium.com/jenkins/inbound-agent:4.11.2-4
+      image: reg.container.com/jenkins/inbound-agent:4.11.2-4
       # jnlp image entrypoint does what we want so we do not specify a command
       resources:
         requests:
@@ -68,7 +68,7 @@ spec:
           name: tmp
           readOnly: false
     - name: terraform
-      image: reg.container.tlium.com/terraform-container:awscli-2.11.7-terraform-1.4.2
+      image: reg.container.com/terraform-container:awscli-2.11.7-terraform-1.4.2
       command: [tail, -f, /dev/null]
       tty: true
       resources:
@@ -83,7 +83,7 @@ spec:
           name: tmp
           readOnly: false
     - name: webhooks
-      image: reg.container.tlium.com/jenkins-webhooks-container:latest
+      image: reg.container.com/jenkins-webhooks-container:latest
       command: [tail, -f, /dev/null]
       resources:
         requests:

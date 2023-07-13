@@ -3,14 +3,14 @@ provider "aws" {
 }
 
 resource "aws_route53_zone" "container_registry" {
-  name = "container.tlium.com."
+  name = "container.com."
 }
 
 # iterate over all regions
 resource "aws_route53_record" "region_record" {
   for_each = { for region in var.regions : region => region }
   zone_id = aws_route53_zone.container_registry.zone_id
-  name    = "reg.container.tlium.com"
+  name    = "reg.container.com"
   type    = "CNAME"
   ttl     = "300"
 
